@@ -1,29 +1,31 @@
-# .github/workflows/update-doc.yml
 name: Auto Update README
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]   # trigger on push to main
+  workflow_dispatch:   # allows you to trigger it manually from GitHub UI
 
 jobs:
   generate-doc:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
+
       - name: Install dependencies
         run: pip install -r requirements.txt
+
       - name: Run doc generator
         run: python autogen_readme.py
-      - name: Commit changes
+
+      - name: Commit and Push changes
         run: |
           git config user.name 'github-actions'
           git config user.email 'github-actions@github.com'
-          git remote set-url origin https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository }}
           git add README.md
           git commit -m "auto: updated README.md with latest code docs" || echo "No changes"
-          git push origin HEAD:main
+          git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository }} HEAD:main
