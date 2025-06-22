@@ -1,0 +1,28 @@
+# .github/workflows/update-doc.yml
+name: Auto Update README
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  generate-doc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run doc generator
+        run: python autogen_readme.py
+      - name: Commit changes
+        run: |
+          git config user.name 'github-actions'
+          git config user.email 'github-actions@github.com'
+          git add README.md
+          git commit -m "auto: updated README.md with latest code docs" || echo "No changes"
+          git push
